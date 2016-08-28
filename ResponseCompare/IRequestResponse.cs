@@ -10,15 +10,9 @@ namespace ResponseCompare
     {
         void MakeRequest();
         string SerializeRequest();
-
-        string ResponseText
-        {
-            get; 
-        }
-
-        int ResponseCode
-        {
-            get; 
-        }       
+        string Url { get; }
+        string InputFilePath { get; }
+        string ResponseText { get; }
+        int ResponseCode { get; }       
     }
 }

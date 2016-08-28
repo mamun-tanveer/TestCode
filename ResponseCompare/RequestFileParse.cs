@@ -12,62 +12,23 @@ namespace ResponseCompare
     {
         public RequestFileParse(string filePath)
         {
+            this.FilePath = filePath;
             using (var reader = new StreamReader(filePath))
             {
                 //do work   
             }
         }
 
-        public CookieContainer Cookies
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
+        public string FilePath { get; private set; }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public string InputText { get; private set; }
 
-        public NameValueCollection QueryString
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
+        public CookieContainer Cookies  {get; set; }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public NameValueCollection QueryString { get; set; }
 
-        public string Url
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
+        public string Url { get; set; }
 
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        public string UserAgent
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public string UserAgent { get; set; }
     }
 }
