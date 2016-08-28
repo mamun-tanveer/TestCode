@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.IO;
 using System.Threading.Tasks;
 
 namespace ResponseCompare
@@ -11,33 +11,33 @@ namespace ResponseCompare
         static void Main(string[] args)
         {
             bool inputValid = false;
-            string folder1 = string.Empty;
-            string folder2 = string.Empty;
+            string requestFolder = string.Empty;
+            string baselineFolder = string.Empty;
             if (args.Length >= 2)
             {
-                folder1 = args[0];
-                folder2 = args[1];
+                requestFolder = args[0];
+                baselineFolder = args[1];
 
-                inputValid = (validateFolder(folder1) && validateFolder(folder2));
+                inputValid = (validateFolder(requestFolder) && validateFolder(baselineFolder));
             } 
             
             if (!inputValid)
             {
-                getInput(out folder1, out folder2);
+                getInput(out requestFolder, out baselineFolder);
             }
         }
 
-        static void getInput(out string x, out string y)
+        static void getInput(out string requests, out string baselines)
         {
-            Console.WriteLine("Input first folder");
-            x = Console.ReadLine();
+            Console.WriteLine("Input request folder");
+            requests = Console.ReadLine();
 
-            Console.WriteLine("Input second folder");
-            y = Console.ReadLine();
+            Console.WriteLine("Input baseline folder");
+            baselines = Console.ReadLine();
 
-            if (!validateFolder(x) || !validateFolder(y))
+            if (!validateFolder(requests) || !validateFolder(baselines))
             {
-                getInput(out x, out y);
+                getInput(out requests, out baselines);
             }       
         }
 
@@ -52,7 +52,17 @@ namespace ResponseCompare
             return returnValue;
         }
 
-        
-                
+        static void processRequests(string requests, string baselines)
+        {
+            Console.WriteLine("Starting Process");
+            Parallel.ForEach<string>(Directory.GetFiles(requests), (currentFile) => { processRequestFile(currentFile, baselines); });
+        }
+
+        static void processRequestFile(string currentFile, string baselines)
+        {
+            var parse = new RequestFileParse(currentFile);
+            var request = new RequestResponse(parse);
+            request.MakeRequest();
+        }
     }
 }

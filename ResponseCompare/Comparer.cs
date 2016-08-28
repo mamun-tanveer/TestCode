@@ -6,8 +6,7 @@ using System.Threading.Tasks;
 
 namespace ResponseCompare
 {
-    interface IFileCompare
+    class Comparer
     {
-        Boolean Compare();
     }
 }
