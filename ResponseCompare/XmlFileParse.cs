@@ -8,20 +8,20 @@ using System.Text;
 
 namespace ResponseCompare
 {
-    class RequestFileParse : IRequestParse
+    class XmlFileParse : IRequestParse
     {
-        public RequestFileParse(string filePath)
+        public XmlFileParse(string filePath)
         {
-            this.FilePath = filePath;
+            this.ID = Path.GetFileName(filePath);
             using (var reader = new StreamReader(filePath))
             {
-                //do work   
+
             }
         }
 
-        public string FilePath { get; private set; }
+        public string ID { get;  set; }
 
-        public string InputText { get; private set; }
+        public string InputText { get;  set; }
 
         public CookieContainer Cookies  {get; set; }
 
@@ -30,5 +30,7 @@ namespace ResponseCompare
         public string Url { get; set; }
 
         public string UserAgent { get; set; }
+
+        public string Response { get; set; }
     }
 }

@@ -2,8 +2,8 @@
 {
     public interface IRequestParse
     {
-        string FilePath { get;  }
-        string InputText { get; }
+        string ID { get; set; }
+        string InputText { get; set; }
         string Url { get; set; }
         string UserAgent { get; set; }
         System.Collections.Specialized.NameValueCollection QueryString { get; set; }

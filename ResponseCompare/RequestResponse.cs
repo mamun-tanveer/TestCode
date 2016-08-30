@@ -30,7 +30,7 @@ namespace ResponseCompare
 
         public RequestResponse(IRequestParse parsedText)
         {
-            InputFilePath = parsedText.FilePath;
+            InputFilePath = parsedText.ID;
             request = (HttpWebRequest) HttpWebRequest.Create(parsedText.Url + "?" + parsedText.QueryString.ToString());
             request.CookieContainer = parsedText.Cookies;
             request.UserAgent = parsedText.UserAgent;        

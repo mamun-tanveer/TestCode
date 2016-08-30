@@ -15,13 +15,13 @@ namespace ResponseCompare
             regularExpressionsCache = regexs;
         }
 
-        public bool CompareVsBaseline(IRequestResponse response, string baselineFolderPath)
+        public bool CompareVsBaseline(IRequestResponse response, string baselineFilePath)
         {
             bool returnValue = false;
             try
             {
                 string responseText = response.ResponseText;
-                string baseLineText = getBaseLineText(response.InputFilePath, baselineFolderPath);
+                string baseLineText = getBaseLineText(response.InputFilePath, baselineFilePath);
                 IEnumerable<string> regexList = regularExpressionsCache.GetRegexes(response.Url);
                 applyRegexes(regexList, ref responseText, ref baseLineText);
                 return (responseText == baseLineText);              
@@ -35,11 +35,11 @@ namespace ResponseCompare
             return returnValue;
         }
 
-        private string getBaseLineText(string responseFilePath, string baselineFolderPath)
+        private string getBaseLineText(string responseFilePath, string baselineFilePath)
         {
             string baselineText = string.Empty;
             string responseFileName = Path.GetFileName(responseFilePath);
-            string baselineFilePath = Path.Combine(baselineFolderPath, responseFilePath);
+            
             using (var reader = new StreamReader(baselineFilePath))
             {
                 baselineText = parseResponsefromFileText(reader.ReadToEnd());

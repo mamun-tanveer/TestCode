@@ -11,47 +11,45 @@ namespace ResponseCompare
         static void Main(string[] args)
         {
             bool inputValid = false;
-            string requestFolder = string.Empty;
+            string[] requestIds = { };
             string baselineFolder = string.Empty;
             string regexFilePath = string.Empty;
-            if (args.Length >= 2)
+            if (args.Length >= 1)
             {
-                requestFolder = args[0];
-                baselineFolder = args[1];
-              
-                inputValid = (validateFolder(requestFolder) && validateFolder(baselineFolder));
-
-                if (inputValid && args.Length > 2)
+                baselineFolder = args[0];
+                inputValid = validateFolder(baselineFolder);
+                
+                if (inputValid && args.Length > 1)
                 {
-                    regexFilePath = args[3];
+                    regexFilePath = args[1];
                     if(!File.Exists(regexFilePath))
                     {
                         Console.WriteLine(regexFilePath + " invalid. Proceeding without regExs");
                         regexFilePath = string.Empty;
                     }
+
+                    //TODO: take request ids as input
                 }
 
             } 
             
             if (!inputValid)
             {
-                getConsoleInput(out requestFolder, out baselineFolder, out regexFilePath);
+                getConsoleInput(out baselineFolder, out regexFilePath);
             }
 
-            processRequests(initComparer(regexFilePath), requestFolder, baselineFolder);
+            processRequests(initComparer(regexFilePath), requestIds, baselineFolder);
         }
 
-        static void getConsoleInput(out string requests, out string baselines, out string regExs)
+        static void getConsoleInput(out string baselines, out string regExs)
         {
-            Console.WriteLine("Input request folder");
-            requests = Console.ReadLine();
 
             Console.WriteLine("Input baseline folder");
             baselines = Console.ReadLine();
 
-            if (!validateFolder(requests) || !validateFolder(baselines))
+            if (!validateFolder(baselines))
             {
-                getConsoleInput(out requests, out baselines, out regExs);
+                getConsoleInput(out baselines, out regExs);
             }
 
             Console.WriteLine("Input RegEx file path");
@@ -81,20 +79,22 @@ namespace ResponseCompare
             return new Comparer(new RegexCache(regexFilePath));
         }
 
-        static void processRequests(Comparer engine, string requests, string baselines)
+        static void processRequests(Comparer engine, IEnumerable<string> requestFileNames, string baselineFolder)
         {
             Console.WriteLine("Starting Process (Multithreaded)");
-            Parallel.ForEach<string>(Directory.GetFiles(requests), (currentFile) => { processRequestFile(engine, currentFile, baselines); });
+            if(requestFileNames.Count() == 0 ) { requestFileNames = Directory.GetFiles(baselineFolder); }
+            Parallel.ForEach<string>(requestFileNames, (requestFileName) => { processRequest(engine, requestFileName, baselineFolder); });
         }
 
-        static void processRequestFile(Comparer engine, string currentFile, string baselines)
+        static void processRequest(Comparer engine, string requestId, string baselineFolderPath)
         {
-            var parse = new RequestFileParse(currentFile);
+            string baselineFilePath = Path.Combine(baselineFolderPath, requestId);
+            var parse = new XmlFileParse(baselineFilePath);
             var request = new RequestResponse(parse);
             request.MakeRequest();
-            if (!engine.CompareVsBaseline(request, baselines))
+            if (!engine.CompareVsBaseline(request, baselineFilePath))
             {
-                Console.WriteLine("Different in " + currentFile);
+                Console.WriteLine("Different in " + requestId);
             }
         }
     }
