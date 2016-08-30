@@ -9,22 +9,16 @@ namespace ResponseCompare
 {
     class Comparer
     {
-        private IRegexCache regularExpressionsCache { get; set; }
-        public Comparer(IRegexCache regexs)
-        {
-            regularExpressionsCache = regexs;
-        }
-
-        public bool CompareVsBaseline(IRequestResponse response, string baselineFilePath)
+        public bool CompareVsBaseline(IRequestResponse test, IRequestResponse baseline)
         {
             bool returnValue = false;
             try
             {
-                string responseText = response.ResponseText;
-                string baseLineText = getBaseLineText(response.InputFilePath, baselineFilePath);
-                IEnumerable<string> regexList = regularExpressionsCache.GetRegexes(response.Url);
-                applyRegexes(regexList, ref responseText, ref baseLineText);
-                return (responseText == baseLineText);              
+                string testResponse = test.ResponseText;
+                string baselineResponse = baseline.ResponseText;
+                IEnumerable<string> regexList = test.RegExs;
+                applyRegexes(regexList, ref testResponse, ref baselineResponse);
+                return (testResponse == baselineResponse);              
             }
             catch (Exception ex)
             {

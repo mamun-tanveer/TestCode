@@ -9,10 +9,12 @@ namespace ResponseCompare
     public interface IRequestResponse
     {
         void MakeRequest();
-        string SerializeRequest();
+        string Serialize();
         string Url { get; }
-        string InputFilePath { get; }
+        string ID { get; }
         string ResponseText { get; }
+
+        IEnumerable<string> RegExs { get; }
         int ResponseCode { get; }       
     }
 }

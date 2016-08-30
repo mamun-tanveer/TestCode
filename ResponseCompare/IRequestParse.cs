@@ -1,12 +1,14 @@
-﻿namespace ResponseCompare
+﻿using System.Collections.Generic;
+
+namespace ResponseCompare
 {
     public interface IRequestParse
     {
         string ID { get; set; }
-        string InputText { get; set; }
-        string Url { get; set; }
+        string UriStem { get; set; }
         string UserAgent { get; set; }
-        System.Collections.Specialized.NameValueCollection QueryString { get; set; }
+        IEnumerable<string> RegExs { get; set; }
+        string QueryString { get; set; }
         System.Net.CookieContainer Cookies {get; set; }
     }
 }

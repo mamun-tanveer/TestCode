@@ -11,8 +11,11 @@ namespace ResponseCompare
 
         private HttpWebRequest request {get; set; }
 
-        public string InputFilePath { get; private set; }
-        public int ResponseCode { get; private set; } = 0; 
+        public string ID { get; private set; }
+        public int ResponseCode { get; private set; } = 0;
+
+        public IEnumerable<string> RegExs { get; private set; } = Enumerable.Empty<string>();
+
         public string ResponseText { get; private set; } = string.Empty;
        
         public string Url
@@ -28,10 +31,11 @@ namespace ResponseCompare
             }
         }
 
-        public RequestResponse(IRequestParse parsedText)
+        public RequestResponse(string baseUrl, IRequestParse parsedText)
         {
-            InputFilePath = parsedText.ID;
-            request = (HttpWebRequest) HttpWebRequest.Create(parsedText.Url + "?" + parsedText.QueryString.ToString());
+
+            var uri = new Uri(new Uri(baseUrl), parsedText.UriStem + "?" + parsedText.QueryString); 
+            request = (HttpWebRequest) HttpWebRequest.Create(uri);
             request.CookieContainer = parsedText.Cookies;
             request.UserAgent = parsedText.UserAgent;        
         }
@@ -59,7 +63,7 @@ namespace ResponseCompare
             }
         }
       
-        public string SerializeRequest()
+        public string Serialize()
         {
             return string.Empty;   
         }

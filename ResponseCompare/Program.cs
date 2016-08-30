@@ -11,56 +11,39 @@ namespace ResponseCompare
         static void Main(string[] args)
         {
             bool inputValid = false;
-            string[] requestIds = { };
+
+            string baseUrl = string.Empty;
             string baselineFolder = string.Empty;
-            string regexFilePath = string.Empty;
-            if (args.Length >= 1)
+            if (args.Length >= 2)
             {
-                baselineFolder = args[0];
+                baseUrl = args[0];
+                baselineFolder = args[1];
+
                 inputValid = validateFolder(baselineFolder);
                 
-                if (inputValid && args.Length > 1)
-                {
-                    regexFilePath = args[1];
-                    if(!File.Exists(regexFilePath))
-                    {
-                        Console.WriteLine(regexFilePath + " invalid. Proceeding without regExs");
-                        regexFilePath = string.Empty;
-                    }
-
-                    //TODO: take request ids as input
-                }
-
             } 
             
             if (!inputValid)
             {
-                getConsoleInput(out baselineFolder, out regexFilePath);
+                getConsoleInput(out baseUrl, out baselineFolder);
             }
 
-            processRequests(initComparer(regexFilePath), requestIds, baselineFolder);
+            processRequests(new Comparer(), baseUrl, baselineFolder);
         }
 
-        static void getConsoleInput(out string baselines, out string regExs)
+        static void getConsoleInput(out string baseUrl, out string baselineFolder)
         {
 
+            Console.WriteLine("Input Base URL, including http://");
+            baseUrl = Console.ReadLine();
+
             Console.WriteLine("Input baseline folder");
-            baselines = Console.ReadLine();
+            baselineFolder = Console.ReadLine();
 
-            if (!validateFolder(baselines))
+            if (!validateFolder(baselineFolder))
             {
-                getConsoleInput(out baselines, out regExs);
+                getConsoleInput(out baseUrl, out baselineFolder);
             }
-
-            Console.WriteLine("Input RegEx file path");
-            regExs = Console.ReadLine();
-
-            if (!File.Exists(regExs))
-            {
-                Console.WriteLine(regExs + " invalid. Proceeding without regExs");
-                regExs = string.Empty;
-            }
-
         }
 
         static bool validateFolder(string path)
@@ -74,27 +57,27 @@ namespace ResponseCompare
             return returnValue;
         }
 
-        static Comparer initComparer(string regexFilePath)
-        {
-            return new Comparer(new RegexCache(regexFilePath));
-        }
-
-        static void processRequests(Comparer engine, IEnumerable<string> requestFileNames, string baselineFolder)
+        static void processRequests(Comparer engine, string baseUrl, string baselineFolder)
         {
             Console.WriteLine("Starting Process (Multithreaded)");
-            if(requestFileNames.Count() == 0 ) { requestFileNames = Directory.GetFiles(baselineFolder); }
-            Parallel.ForEach<string>(requestFileNames, (requestFileName) => { processRequest(engine, requestFileName, baselineFolder); });
+            var files = Directory.GetFiles(baselineFolder); 
+            Parallel.ForEach<string>(files, (baselineFilePath) => { processRequest(engine, baseUrl, baselineFilePath); });
         }
 
-        static void processRequest(Comparer engine, string requestId, string baselineFolderPath)
+        static void processRequest(Comparer engine, string baseUrl, string baselineFilePath)
         {
-            string baselineFilePath = Path.Combine(baselineFolderPath, requestId);
             var parse = new XmlFileParse(baselineFilePath);
-            var request = new RequestResponse(parse);
-            request.MakeRequest();
-            if (!engine.CompareVsBaseline(request, baselineFilePath))
+            var baseline = new RequestResponse(baseUrl, parse);
+
+            //empty the response for the test
+            parse.Response = string.Empty;
+            var test = new RequestResponse(baseUrl, parse);
+            test.MakeRequest();
+
+            //compare
+            if (!engine.CompareVsBaseline(test, baseline))
             {
-                Console.WriteLine("Different in " + requestId);
+                Console.WriteLine("Different in " + test.ID);
             }
         }
     }
