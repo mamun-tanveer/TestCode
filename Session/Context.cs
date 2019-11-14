@@ -21,6 +21,20 @@ namespace Session
             mSessionDB = db;
         }
 
+        public async Task<IEnumerable<string>> GetAllValues()
+        {
+            var dbValues = await mSessionDB.Read<ContextValue<dynamic>>("Context", "ContextId", ContextId.ToString());
+            IEnumerable<string> stringValues = dbValues.Select(x => x.ToString());
+            return stringValues;    
+        }
+
+        public async Task<string> GetValueText(string key)            
+        {
+            var dbValues = await mSessionDB.Read<ContextValue<dynamic>>("Context", "ContextId", ContextId.ToString());
+            string stringValue = dbValues.First().ToString();
+            return stringValue;
+        }
+
         public T GetValue<T>(string key)
         {
             throw new NotImplementedException();

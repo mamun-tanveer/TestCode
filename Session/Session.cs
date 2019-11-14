@@ -45,5 +45,20 @@ namespace Session
             return new Context(_id, workloadId, mSessionDB);
         }
 
+        public async Task<Session> RefreshFromDB()
+        {
+            var matches = await mSessionDB.Read<Session>("Session", "_id", UserId);
+            var dbSession = matches.First();
+            if(dbSession._id == _id)
+            {
+                UserId = dbSession.UserId;
+                OrderTermId = dbSession.OrderTermId;
+                CustomerTermId = dbSession.CustomerTermId;
+                ExternalSessionId = dbSession.ExternalSessionId;
+                CurrentContextId = dbSession.CurrentContextId;
+            }
+
+            return dbSession;
+        }
     }
 }
