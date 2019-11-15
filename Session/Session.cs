@@ -12,26 +12,28 @@ namespace Session
 
         private ISessionStore mSessionDB;
         public object _id { get; set; }
-        public string UserId { get; set;  }
+        public string User { get; set;  }
         public string OrderTermId { get; set; }
         public string CustomerTermId { get; set; }
         public long ExternalSessionId { get; set; }
         public long CurrentContextId { get; set; }
+        public long HkUpdateTicks { get; set; }
 
-        public Session(ISessionStore db, object sessionID)
+        public Session(ISessionStore db, string inputUserId)
         {
-            _id = sessionID;
+            _id = inputUserId;
             mSessionDB = db;
+            User = inputUserId;
         }
 
         public Context GetContext(long contextId)
         {
-            return new Context(_id, contextId, mSessionDB);
+            return new Context(contextId, User, mSessionDB);
         }
 
         public Context GetCurrentContext()
         {
-            return new Context(_id, CurrentContextId, mSessionDB);
+            return new Context(CurrentContextId, User, mSessionDB);
         }
 
         public void ClearCurrentContext()
@@ -44,7 +46,7 @@ namespace Session
         {
             CurrentContextId = workloadId;
             await mSessionDB.Write(COLLECTION_NAME, this);
-            return new Context(_id, workloadId, mSessionDB);
+            return new Context(workloadId, User, mSessionDB);
         }
 
         public async Task<Session> RefreshFromDB()
@@ -53,7 +55,7 @@ namespace Session
             var dbSession = matches.FirstOrDefault();
             if(dbSession?._id == _id)
             {
-                UserId = dbSession.UserId;
+                User = dbSession.User;
                 OrderTermId = dbSession.OrderTermId;
                 CustomerTermId = dbSession.CustomerTermId;
                 ExternalSessionId = dbSession.ExternalSessionId;

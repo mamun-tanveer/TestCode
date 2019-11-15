@@ -82,8 +82,10 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ClearHttpHandler.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="ContextValue.cs" />
+    <Compile Include="AsyncHttpHandlerBase.cs" />
     <Compile Include="LocalMongoDB.cs" />
     <Compile Include="PushHttpHandler.cs" />
     <Compile Include="ISessionStore.cs" />

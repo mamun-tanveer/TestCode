@@ -27,16 +27,11 @@ namespace Session
             if (contextId > 0)
             {
 
-                FilterDefinition<TOutput> contextQuery = builder.Eq("ContextId", value);
+                FilterDefinition<TOutput> contextQuery = builder.Eq("ContextId", contextId);
                 query = builder.And(query, contextQuery);         
             }
             var cursor = await collection.FindAsync(query);
             return await cursor.ToListAsync();
-        }
-
-        public Task<long> UpdateField<T>(string collectionName, string key, string fieldName, T value, long updateTicks = 0)
-        {
-            throw new NotImplementedException();
         }
 
         public async Task Write(string collectionName, ISessionObject sessionObject)
@@ -46,6 +41,18 @@ namespace Session
             if (sessionObject._id == null) sessionObject._id = MongoDB.Bson.ObjectId.GenerateNewId();
             FilterDefinition<ISessionObject> query = queryBuilder.Eq("_id", sessionObject._id);
             await collection.ReplaceOneAsync(query, sessionObject, new UpdateOptions { IsUpsert = true });
+        }
+
+        public async Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId) 
+        {
+            var collection = db.GetCollection<ISessionObject>(collectionName);
+            var queryBuilder = new FilterDefinitionBuilder<ISessionObject>();
+            var queryList = new List<FilterDefinition<ISessionObject>>();
+            queryList.Add(queryBuilder.Eq("User", user));                
+            queryList.Add(queryBuilder.Eq("ContextId", contextId));
+            if(string.IsNullOrEmpty(name) == false) queryList.Add(queryBuilder.Eq(name, value));
+            var result = await collection.DeleteManyAsync(queryBuilder.And(queryList));
+            return result.DeletedCount;
         }
     }
 }

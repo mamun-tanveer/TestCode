@@ -11,6 +11,7 @@ namespace Session
     {
         public object _id { get; set; }
         public long HkUpdateTicks { get; set; }
+        public string User { get; set; }
         public string Key { get; set; }
         public T Value { get; set; }
         public long ContextId { get; set;}

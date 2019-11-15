@@ -8,52 +8,51 @@ namespace Session
 {
     public class Context
     {
-        public object SessionId { get; private set; }
+        public const string COLLECTION_NAME = "Context";
+        
+        public string SessionUser { get; private set; } 
         public long ContextId { get; private set; }
 
         private ISessionStore mSessionDB;
 
-        public Context(object inputSessionId, long inputContextId, ISessionStore db)
+        public Context(long inputContextId, string userName,  ISessionStore db)
         {
-            SessionId = inputSessionId;
             ContextId = inputContextId;
-
+            SessionUser = userName;
             mSessionDB = db;
         }
 
         public async Task<IEnumerable<string>> GetAllValues()
         {
-            var dbValues = await mSessionDB.Read<long, ContextValue<dynamic>>("Context", "ContextId", ContextId);
+            var dbValues = await mSessionDB.Read<string, ContextValue<string>>(COLLECTION_NAME, "User", SessionUser, ContextId);
             IEnumerable<string> stringValues = dbValues.Select(x => x.ToString());
             return stringValues;    
         }
 
-        public async Task<string> GetValueText(string key)            
+        public async Task<T> GetValue<T>(string key)
         {
-            var dbValues = await mSessionDB.Read<long, ContextValue<dynamic>>("Context", "ContextId", ContextId);
-            string stringValue = dbValues.First().ToString();
-            return stringValue;
-        }
-
-        public T GetValue<T>(string key)
-        {
-            throw new NotImplementedException();
+            var dbValues = await mSessionDB.Read<string, ContextValue<T>>(COLLECTION_NAME, "Key", key, ContextId);
+            ContextValue<T> firstValue = dbValues.FirstOrDefault();
+            if (firstValue == null) return default(T);
+            else return firstValue.Value;                        
         }
 
         public Task AddValue<T>(string key, T newValue)
         {
-            var value = new ContextValue<T> { ContextId = ContextId, Key = key, Value = newValue, HkUpdateTicks = DateTime.Now.Ticks };
+            var value = new ContextValue<T> { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue, HkUpdateTicks = DateTime.Now.Ticks };
             return mSessionDB.Write("Context", value);
         }
 
-        public long UpdateValue<T>(string key, T newValue, long lastUpdateTicks = 0)
+        public async Task UpdateValue<T>(string key, T newValue)
         {
-            throw new NotImplementedException();
+            await mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
+            var valueObject = new ContextValue<T>{ ContextId = ContextId, User = SessionUser, Key = key, Value = newValue };
+            await mSessionDB.Write(COLLECTION_NAME, valueObject);
         }
 
-        public void DeleteValue(string key)
+        public Task<long> DeleteValue(string key)
         {
-            throw new NotImplementedException();
+            return mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
         }
     }
 }

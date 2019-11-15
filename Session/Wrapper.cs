@@ -8,10 +8,10 @@ namespace Session
 {
     public static class Wrapper
     {
-        public static Session GetSession(long sessionId = 0)
+        public const int TIMEOUT_MS = 10000; 
+        public static Session GetSession()
         {
-            if (sessionId > 0) return new Session(getDatabase(), sessionId);
-            else return retrieveSessionForUser(Environment.UserName);
+            return retrieveSessionForUser(Environment.UserName);            
         }
 
         public static Context GetContext(long contextId = 0)
@@ -23,7 +23,9 @@ namespace Session
         public static T GetValue<T>(string key, long contextId = 0)
         {
             var context = GetContext(contextId);
-            return context.GetValue<T>(key);
+            var task = context.GetValue<T>(key);
+            if (task.Wait(TIMEOUT_MS)) return task.Result;
+            else throw new TimeoutException("GetValue exceeded timeout ms = " + TIMEOUT_MS);
         }
 
         public static void AddValue<T>(string key, T value, long contextId = 0)
@@ -32,10 +34,14 @@ namespace Session
             context.AddValue(key, value);
         }
 
-        public static long UpdateValue<T>(string key, T value, long updateTicks = 0, long contextId = 0)
+        public static void UpdateValue<T>(string key, T value, long contextId = 0)
         {
             var context = GetContext(contextId);
-            return context.UpdateValue(key, value, updateTicks);
+            var task = context.UpdateValue(key, value);
+            if(!task.Wait(TIMEOUT_MS))
+            {
+                throw new TimeoutException("UpdateValue exceed timeout ms = " + TIMEOUT_MS);
+            }
         }
 
         public static void DeleteValue(string key, long contextId = 0)

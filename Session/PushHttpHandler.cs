@@ -3,63 +3,36 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Web;
 
 namespace Session
 {
-    public class PushHttpHandler : System.Web.HttpTaskAsyncHandler
+    public class PushHttpHandler : AsyncHttpHandlerBase
     {
-        public override async Task ProcessRequestAsync(HttpContext context)
+        protected async override Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0)
         {
-            try
+            var session = new Session(db, user);
+            var currentContext = (contextId > 0) ? session.GetContext(contextId) : session.GetCurrentContext();
+            int count = 0;
+            string action = "add";
+            if(currentContext.ContextId == 0)
             {
-                string user = string.Empty;
-                string customer = string.Empty;
-                string order = string.Empty;
-                long contextId = 0; 
-                foreach(string key in context.Request.QueryString.AllKeys)
+                action = "update";
+                foreach (var qsPair in qsDict)
                 {
-                    switch(key.ToLower())
-                    {
-                        case "user":
-                            user = getQSValue(context, key);
-                            break;
-                        case "customer":
-                            customer = getQSValue(context, key);
-                            break;
-                        case "order":
-                            order = getQSValue(context, key);
-                            break;
-                        case "context":
-                            long.TryParse(getQSValue(context, key), out contextId);
-                            break;                            
-                    }
-                }
-                if(string.IsNullOrEmpty(user))
-                {
-                    context.Response.Write("Must Supply a User");
-                }
-                else
-                {
-                    await DoWork(user, customer, order, contextId);
-                    context.Response.Write("Done");
+                    await currentContext.UpdateValue(qsPair.Key, qsPair.Value);
+                    count++;
                 }
             }
-            catch (Exception ex)
+            else
             {
-                handleFailures(context, ex);
+                foreach (var qsPair in qsDict)
+                {
+                    await currentContext.AddValue(qsPair.Key, qsPair.Value);
+                    count++;
+                }
             }
-        }
 
-        private string getQSValue(HttpContext context, string key)
-        {
-            return context.Request.QueryString.Get(key);
-        }
-
-        private void handleFailures(HttpContext context, Exception ex)
-        {
-            context.Response.StatusCode = 500;
-            context.Response.Write(ex.ToString());
+            return action + " " + "count";
         }
 
         private async Task DoWork(string user, string customer, string order, long contextId)

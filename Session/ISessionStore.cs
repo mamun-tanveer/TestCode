@@ -9,12 +9,13 @@ namespace Session
     public interface ISessionObject
     {
         object _id { get; set; }
+        long HkUpdateTicks { get; set; }
     }
 
     public interface ISessionStore
     {
+        Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string name, TInput value, long contextId = 0);   
         Task Write(string collectionName, ISessionObject sessionObject);
-        Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string name, TInput value, long contextId = 0);
-        Task<long> UpdateField<T>(string collectionName, string key, string fieldName, T value, long updateTicks = 0);
-     }
+        Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId);
+    }
 }
