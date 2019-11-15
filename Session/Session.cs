@@ -8,7 +8,7 @@ namespace Session
 {
     public class Session : ISessionObject
     {
-        public const string COLLECTION_NAME = "HEADER";
+        public const string COLLECTION_NAME = "Header";
 
         private ISessionStore mSessionDB;
         public object _id { get; set; }
@@ -49,7 +49,7 @@ namespace Session
 
         public async Task<Session> RefreshFromDB()
         {
-            var matches = await mSessionDB.Read<string, Session>(COLLECTION_NAME, "_id", UserId);
+            var matches = await mSessionDB.Read<string, Session>(COLLECTION_NAME, "_id", _id.ToString());
             var dbSession = matches.FirstOrDefault();
             if(dbSession?._id == _id)
             {
@@ -57,10 +57,10 @@ namespace Session
                 OrderTermId = dbSession.OrderTermId;
                 CustomerTermId = dbSession.CustomerTermId;
                 ExternalSessionId = dbSession.ExternalSessionId;
-                CurrentContextId = dbSession.CurrentContextId;
+                CurrentContextId = dbSession.CurrentContextId;               
             }
 
-            return dbSession;
+            return this;
         }
     }
 }

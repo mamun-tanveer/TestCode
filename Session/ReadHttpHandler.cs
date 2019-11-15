@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
 using System.Web;
-using System.Collections.Generic;
 
 namespace Session
 {
@@ -87,19 +86,6 @@ namespace Session
             }
 
             return returnValue;      
-        }
-
-        private string FormatResult<T>(T result, string format)
-        {
-            string returnValue = string.Empty;
-            switch (format)
-            {
-                case "json":
-                    
-                    break;
-            }
-
-            return returnValue;
-        }
+        }      
     }
 }
