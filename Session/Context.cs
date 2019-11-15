@@ -52,7 +52,8 @@ namespace Session
 
         public Task<long> DeleteValue(string key)
         {
-            return mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
+            if (string.IsNullOrEmpty(key)) return mSessionDB.Delete(COLLECTION_NAME, SessionUser, string.Empty, string.Empty, ContextId);
+            else return mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
         }
     }
 }
