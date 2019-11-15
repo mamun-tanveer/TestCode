@@ -30,3 +30,4 @@ _ReSharper*/
 *.dll
 *.nupkg
 packages/
+/visual studio 2015/settings/CurrentSettings.vssettings

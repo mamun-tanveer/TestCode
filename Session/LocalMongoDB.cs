@@ -18,14 +18,16 @@ namespace Session
             db = client.GetDatabase("Session");
         }
 
-        public async Task<List<T>> Read<T>(string collectionName, string name, string value, long contextId = 0)
+        public async Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string name, TInput value, long contextId = 0)
         {
-            var collection = db.GetCollection<T>(collectionName);
-            FilterDefinition<T> query = "{" + name + ":" + value + "}";
+            var collection = db.GetCollection<TOutput>(collectionName);
+            var builder = new FilterDefinitionBuilder<TOutput>();
+
+            FilterDefinition<TOutput> query = builder.Eq(name, value);
             if (contextId > 0)
             {
-                var builder = new FilterDefinitionBuilder<T>();
-                FilterDefinition<T> contextQuery = "{ContextId" + ":" + contextId.ToString() + "}";
+
+                FilterDefinition<TOutput> contextQuery = builder.Eq("ContextId", value);
                 query = builder.And(query, contextQuery);         
             }
             var cursor = await collection.FindAsync(query);

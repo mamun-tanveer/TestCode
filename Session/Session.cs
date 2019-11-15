@@ -8,6 +8,8 @@ namespace Session
 {
     public class Session : ISessionObject
     {
+        public const string COLLECTION_NAME = "HEADER";
+
         private ISessionStore mSessionDB;
         public object _id { get; set; }
         public string UserId { get; set;  }
@@ -35,21 +37,21 @@ namespace Session
         public void ClearCurrentContext()
         {
             CurrentContextId = 0;
-            mSessionDB.Write("Header", this);
+            mSessionDB.Write(COLLECTION_NAME, this);
         }
 
         public async Task<Context> CreateNewContext(long workloadId)
         {
             CurrentContextId = workloadId;
-            await mSessionDB.Write("Header", this);
+            await mSessionDB.Write(COLLECTION_NAME, this);
             return new Context(_id, workloadId, mSessionDB);
         }
 
         public async Task<Session> RefreshFromDB()
         {
-            var matches = await mSessionDB.Read<Session>("Session", "_id", UserId);
-            var dbSession = matches.First();
-            if(dbSession._id == _id)
+            var matches = await mSessionDB.Read<string, Session>(COLLECTION_NAME, "_id", UserId);
+            var dbSession = matches.FirstOrDefault();
+            if(dbSession?._id == _id)
             {
                 UserId = dbSession.UserId;
                 OrderTermId = dbSession.OrderTermId;

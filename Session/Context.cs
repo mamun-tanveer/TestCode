@@ -23,14 +23,14 @@ namespace Session
 
         public async Task<IEnumerable<string>> GetAllValues()
         {
-            var dbValues = await mSessionDB.Read<ContextValue<dynamic>>("Context", "ContextId", ContextId.ToString());
+            var dbValues = await mSessionDB.Read<long, ContextValue<dynamic>>("Context", "ContextId", ContextId);
             IEnumerable<string> stringValues = dbValues.Select(x => x.ToString());
             return stringValues;    
         }
 
         public async Task<string> GetValueText(string key)            
         {
-            var dbValues = await mSessionDB.Read<ContextValue<dynamic>>("Context", "ContextId", ContextId.ToString());
+            var dbValues = await mSessionDB.Read<long, ContextValue<dynamic>>("Context", "ContextId", ContextId);
             string stringValue = dbValues.First().ToString();
             return stringValue;
         }
