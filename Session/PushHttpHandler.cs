@@ -32,7 +32,7 @@ namespace Session
                 }
             }
 
-            return action + " " + "count";
+            return action + " " + count;
         }
 
         private async Task DoWork(string user, string customer, string order, long contextId)

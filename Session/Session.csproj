@@ -90,6 +90,7 @@
     <Compile Include="PushHttpHandler.cs" />
     <Compile Include="ISessionStore.cs" />
     <Compile Include="ReadHttpHandler.cs" />
+    <Compile Include="RegisterHttpHandler.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
