@@ -10,7 +10,7 @@ namespace Session
     {
         protected async override Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0)
         {
-            var session = new Session(db, user);
+            var session = Session.GetSessionForUser(db, user);
             var currentContext = (contextId > 0) ? session.GetContext(contextId) : session.GetCurrentContext();
             int count = 0;
             string action = "add";
@@ -33,17 +33,6 @@ namespace Session
             }
 
             return action + " " + count;
-        }
-
-        private async Task DoWork(string user, string customer, string order, long contextId)
-        {
-            var db = new LocalMongoDB();
-            var session = new Session(db, user);
-            var context = await session.CreateNewContext(contextId);
-            long customerId, orderId; 
-            if(long.TryParse(customer, out customerId)) await context.AddValue("AdId", customerId);
-            if (long.TryParse(order, out orderId)) await context.AddValue("WoId", orderId);
-
         }
     }
 }

@@ -39,6 +39,7 @@ namespace Session
             var collection = db.GetCollection<ISessionObject>(collectionName);
             var queryBuilder = new FilterDefinitionBuilder<ISessionObject>();
             if (sessionObject._id == null) sessionObject._id = MongoDB.Bson.ObjectId.GenerateNewId();
+            sessionObject.HkUpdateTicks = DateTime.Now.Ticks;
             FilterDefinition<ISessionObject> query = queryBuilder.Eq("_id", sessionObject._id);
             await collection.ReplaceOneAsync(query, sessionObject, new UpdateOptions { IsUpsert = true });
         }

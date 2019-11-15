@@ -11,8 +11,7 @@ namespace Session
         protected async override Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0)
         {
             string returnValue = string.Empty;
-            var session = new Session(db, user);
-            session = await session.RefreshFromDB();
+            var session = Session.GetSessionForUser(db, user);
             Context readContext = (contextId > 0) ? session.GetContext(contextId) : session.GetCurrentContext();
             string keyName = string.Empty;
             qsDict.TryGetValue("key", out keyName);

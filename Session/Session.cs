@@ -19,7 +19,27 @@ namespace Session
         public long CurrentContextId { get; set; }
         public long HkUpdateTicks { get; set; }
 
-        public Session(ISessionStore db, string inputUserId)
+        public static Session GetSessionForUser(ISessionStore db, string userName)
+        {
+            Session returnSession = null; 
+            var task = Task.Run(async() => await db.Read<string, Session>(COLLECTION_NAME, "_id", userName.ToLower()));
+            if (task.Wait(10000)) returnSession = task.Result.FirstOrDefault();
+
+            if (returnSession == null)
+            {
+                //nothing in the database;
+                returnSession = new Session(db, userName);
+            }
+            else
+            {
+                // need to reset the collaborator
+                returnSession.mSessionDB = db;
+            }
+           
+            return returnSession;
+        }
+
+        private Session(ISessionStore db, string inputUserId)
         {
             _id = inputUserId;
             mSessionDB = db;
@@ -47,22 +67,6 @@ namespace Session
             CurrentContextId = workloadId;
             await mSessionDB.Write(COLLECTION_NAME, this);
             return new Context(workloadId, User, mSessionDB);
-        }
-
-        public async Task<Session> RefreshFromDB()
-        {
-            var matches = await mSessionDB.Read<string, Session>(COLLECTION_NAME, "_id", _id.ToString());
-            var dbSession = matches.FirstOrDefault();
-            if(dbSession?._id == _id)
-            {
-                User = dbSession.User;
-                OrderTermId = dbSession.OrderTermId;
-                CustomerTermId = dbSession.CustomerTermId;
-                ExternalSessionId = dbSession.ExternalSessionId;
-                CurrentContextId = dbSession.CurrentContextId;               
-            }
-
-            return this;
         }
     }
 }

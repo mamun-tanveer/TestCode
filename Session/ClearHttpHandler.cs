@@ -12,8 +12,7 @@ namespace Session
         {
 
             string returnMessage = string.Empty;
-            var userSession = new Session(db, user);
-            await userSession.RefreshFromDB();
+            var userSession = Session.GetSessionForUser(db, user);
             
             if(contextId == 0)
             {
