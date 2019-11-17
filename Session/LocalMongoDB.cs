@@ -44,7 +44,7 @@ namespace Session
             await collection.ReplaceOneAsync(query, sessionObject, new UpdateOptions { IsUpsert = true });
         }
 
-        public async Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId) 
+        public async Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId = 0) 
         {
             var collection = db.GetCollection<ISessionObject>(collectionName);
             var queryBuilder = new FilterDefinitionBuilder<ISessionObject>();
@@ -54,6 +54,22 @@ namespace Session
             if(string.IsNullOrEmpty(name) == false) queryList.Add(queryBuilder.Eq(name, value));
             var result = await collection.DeleteManyAsync(queryBuilder.And(queryList));
             return result.DeletedCount;
+        }
+
+        public async Task<bool> HasChanges(string collectionName, string user, DateTime since, long contextId = 0)
+        {
+            var collection = db.GetCollection<ISessionObject>(collectionName);
+            var builder = new FilterDefinitionBuilder<ISessionObject>();
+            var query = builder.And(builder.Eq("User", user), builder.Gt("HkUpdateTicks", since.Ticks));
+            if (contextId > 0)
+            {
+
+                FilterDefinition<ISessionObject> contextQuery = builder.Eq("ContextId", contextId);
+                query = builder.And(query, contextQuery);
+            }
+
+            long matchCount = await collection.CountDocumentsAsync(query);
+            return (matchCount > 0);
         }
     }
 }

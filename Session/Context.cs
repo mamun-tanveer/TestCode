@@ -55,5 +55,10 @@ namespace Session
             if (string.IsNullOrEmpty(key)) return mSessionDB.Delete(COLLECTION_NAME, SessionUser, string.Empty, string.Empty, ContextId);
             else return mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
         }
+
+        public Task<bool> HasChanges(DateTime since)
+        {
+            return mSessionDB.HasChanges(COLLECTION_NAME, SessionUser, since, ContextId);
+        }
     }
 }

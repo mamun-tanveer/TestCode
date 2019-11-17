@@ -11,24 +11,25 @@ namespace Session
         {
             try
             {
+                context.Response.Cache.SetCacheability(HttpCacheability.NoCache);
+                context.Response.Cache.SetNoStore();
+                context.Response.Cache.SetNoServerCaching();
+
                 string user = string.Empty;
-                long contextId = 0; long sessionId = 0;
-                var keys = new Dictionary<string, string>();
+                long contextId = 0;
+                var qsDict = new Dictionary<string, string>();
                 foreach (string qsName in context.Request.QueryString.AllKeys)
                 {
                     switch (qsName.ToLower())
                     {
                         case "user":
-                            user = getQSValue(context, qsName);
+                            user = getQSValue(context, qsName).ToLower();
                             break;
                         case "context":
                             long.TryParse(getQSValue(context, qsName), out contextId);
                             break;
-                        case "session":
-                            long.TryParse(getQSValue(context, qsName), out sessionId);
-                            break;
                         default:
-                            keys[qsName] = getQSValue(context, qsName);
+                            qsDict[qsName.ToLower()] = getQSValue(context, qsName);
                             break;
                     }
                 }
@@ -39,7 +40,8 @@ namespace Session
                 else
                 {
                     ISessionStore db = new LocalMongoDB();
-                    string result = await DoWork(db, user, keys, contextId, sessionId);
+
+                    string result = await DoWork(Session.GetSessionForUser(db, user), qsDict, contextId);
                     context.Response.Write(result);
                     context.Response.ContentType = "text/json";
                 }
@@ -59,9 +61,10 @@ namespace Session
         {
             context.Response.StatusCode = 500;
             context.Response.Write(ex.ToString());
+            context.Response.ContentType = "text/plain";
         }
 
-        protected abstract Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0);
+        protected abstract Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0);
 
     }
 }

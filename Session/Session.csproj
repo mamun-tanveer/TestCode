@@ -82,17 +82,18 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ChangesHttpHandler.cs" />
     <Compile Include="ClearHttpHandler.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="ContextValue.cs" />
     <Compile Include="AsyncHttpHandlerBase.cs" />
     <Compile Include="LocalMongoDB.cs" />
+    <Compile Include="NewWorkHttpHandler.cs" />
     <Compile Include="PushHttpHandler.cs" />
     <Compile Include="ISessionStore.cs" />
     <Compile Include="ReadHttpHandler.cs" />
     <Compile Include="RegisterHttpHandler.cs" />
     <Compile Include="Session.cs" />
-    <Compile Include="Wrapper.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>

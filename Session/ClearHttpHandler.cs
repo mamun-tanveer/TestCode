@@ -8,22 +8,24 @@ namespace Session
 {
     public class ClearHttpHandler : AsyncHttpHandlerBase
     {
-        protected async override Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0)
+        protected async override Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0)
         {
 
             string returnMessage = string.Empty;
-            var userSession = Session.GetSessionForUser(db, user);
-            
-            if(contextId == 0)
+                        
+            if(contextId == userSession.CurrentContextId)
             {
-                Context updatingContext = userSession.GetContext(0);
-                long deleteCount = await updatingContext.DeleteValue(string.Empty);
-                returnMessage = deleteCount + " values deleted";    
-            }
-            else if(contextId == userSession.CurrentContextId)
-            {
-                await db.Write(Session.COLLECTION_NAME, userSession);
-                returnMessage = contextId + " cleared from session";
+                if (contextId == 0)
+                {
+                    Context updatingContext = userSession.GetContext(0);
+                    long deleteCount = await updatingContext.DeleteValue(string.Empty);
+                    returnMessage = deleteCount + " values deleted";
+                }
+                else
+                {
+                    await userSession.ClearCurrentContext();
+                    returnMessage = contextId + " cleared from session";
+                }
             }
             else
             {

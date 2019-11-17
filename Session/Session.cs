@@ -56,17 +56,30 @@ namespace Session
             return new Context(CurrentContextId, User, mSessionDB);
         }
 
-        public void ClearCurrentContext()
+        public Task ClearCurrentContext()
         {
             CurrentContextId = 0;
-            mSessionDB.Write(COLLECTION_NAME, this);
+            return mSessionDB.Write(COLLECTION_NAME, this);
         }
 
-        public async Task<Context> CreateNewContext(long workloadId)
+        public async Task<Context> CreateNewContext(long contextId)
         {
-            CurrentContextId = workloadId;
+            CurrentContextId = contextId;
             await mSessionDB.Write(COLLECTION_NAME, this);
-            return new Context(workloadId, User, mSessionDB);
+            return new Context(contextId, User, mSessionDB);
+        }
+
+        public Task Save()
+        {
+            return mSessionDB.Write(COLLECTION_NAME, this);
+        }
+
+        public async Task<bool> HasChanges(DateTime since, long contextId = 0)
+        {
+            bool sessionValue = await mSessionDB.HasChanges(COLLECTION_NAME, User, since);
+            Context context = (contextId == 0) ? GetCurrentContext() : GetContext(contextId);
+            bool contextValue = await context.HasChanges(since);
+            return (sessionValue || contextValue);
         }
     }
 }

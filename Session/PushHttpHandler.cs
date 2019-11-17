@@ -8,10 +8,9 @@ namespace Session
 {
     public class PushHttpHandler : AsyncHttpHandlerBase
     {
-        protected async override Task<string> DoWork(ISessionStore db, string user, Dictionary<string, string> qsDict, long sessionId = 0, long contextId = 0)
+        protected async override Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0)
         {
-            var session = Session.GetSessionForUser(db, user);
-            var currentContext = (contextId > 0) ? session.GetContext(contextId) : session.GetCurrentContext();
+            var currentContext = (contextId > 0) ? userSession.GetContext(contextId) : userSession.GetCurrentContext();
             int count = 0;
             string action = "add";
             if(currentContext.ContextId == 0)

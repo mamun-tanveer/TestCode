@@ -16,6 +16,7 @@ namespace Session
     {
         Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string name, TInput value, long contextId = 0);   
         Task Write(string collectionName, ISessionObject sessionObject);
-        Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId);
+        Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId = 0);
+        Task<bool> HasChanges(string collectionName, string user, DateTime since, long contextId = 0);
     }
 }
