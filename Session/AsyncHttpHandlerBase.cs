@@ -29,7 +29,7 @@ namespace Session
                             long.TryParse(getQSValue(context, qsName), out contextId);
                             break;
                         default:
-                            qsDict[qsName.ToLower()] = getQSValue(context, qsName);
+                            qsDict[qsName] = getQSValue(context, qsName);
                             break;
                     }
                 }
