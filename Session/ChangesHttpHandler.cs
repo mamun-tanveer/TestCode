@@ -13,7 +13,9 @@ namespace Session
         {
             DateTime since = parseTime(qsDict["since"]);
             bool answer = await userSession.HasChanges(since, contextId);
-            return answer.ToString() + " since " + since.ToString(TIME_FORMAT);
+            var response = new ChangesResponse { HasChanged = answer, Since = since };
+
+            return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 
         private DateTime parseTime(string qsValue)

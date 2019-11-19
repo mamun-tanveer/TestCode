@@ -40,7 +40,7 @@ namespace Session
         public Task AddValue<T>(string key, T newValue)
         {
             var value = new ContextValue<T> { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue, HkUpdateTicks = DateTime.Now.Ticks };
-            return mSessionDB.Write("Context", value);
+            return mSessionDB.Write(COLLECTION_NAME, value);
         }
 
         public async Task UpdateValue<T>(string key, T newValue)

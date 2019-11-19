@@ -15,10 +15,21 @@ namespace Session
             string action = "add";
             if(currentContext.ContextId == 0)
             {
-                action = "update";
+                action = "update";                
                 foreach (var qsPair in qsDict)
                 {
-                    await currentContext.UpdateValue(qsPair.Key, qsPair.Value);
+                    if(qsPair.Key =="adId" || qsPair.Key == "WkordId")
+                    {
+                        action = "delete/add";
+                        //mainframe special values, delete all, add the new one
+                        await currentContext.DeleteValue("adId");
+                        await currentContext.DeleteValue("WkordId");
+                        await currentContext.AddValue(qsPair.Key, qsPair.Value);
+                    }
+                    else
+                    {
+                        await currentContext.UpdateValue(qsPair.Key, qsPair.Value);
+                    }
                     count++;
                 }
             }

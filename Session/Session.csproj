@@ -83,6 +83,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ChangesHttpHandler.cs" />
+    <Compile Include="ChangesResponse.cs" />
     <Compile Include="ClearHttpHandler.cs" />
     <Compile Include="Context.cs" />
     <Compile Include="ContextValue.cs" />
