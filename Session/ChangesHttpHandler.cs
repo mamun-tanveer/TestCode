@@ -12,9 +12,8 @@ namespace Session
         protected async override Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0)
         {
             DateTime since = parseTime(qsDict["since"]);
-            bool answer = await userSession.HasChanges(since, contextId);
-            var response = new ChangesResponse { HasChanged = answer, Since = since };
-
+            Tuple<long, long, long> answer = await userSession.HasChanges(since, contextId);
+            var response = new ChangesResponse(answer.Item1, answer.Item2, answer.Item3, since);    
             return Newtonsoft.Json.JsonConvert.SerializeObject(response);
         }
 

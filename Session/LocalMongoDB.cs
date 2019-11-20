@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using MongoDB.Driver;
+using MongoDB.Bson;
 
 namespace Session
 {
@@ -56,20 +57,28 @@ namespace Session
             return result.DeletedCount;
         }
 
-        public async Task<bool> HasChanges(string collectionName, string user, DateTime since, long contextId = 0)
+        public async Task<long> HasChanges(string collectionName, string user, DateTime since, long contextId = 0)
         {
-            var collection = db.GetCollection<ISessionObject>(collectionName);
-            var builder = new FilterDefinitionBuilder<ISessionObject>();
+            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var builder = new FilterDefinitionBuilder<BsonDocument>();
             var query = builder.And(builder.Eq("User", user), builder.Gt("HkUpdateTicks", since.Ticks));
             if (contextId > 0)
             {
 
-                FilterDefinition<ISessionObject> contextQuery = builder.Eq("ContextId", contextId);
+                FilterDefinition<BsonDocument> contextQuery = builder.Eq("ContextId", contextId);
                 query = builder.And(query, contextQuery);
             }
 
-            long matchCount = await collection.CountDocumentsAsync(query);
-            return (matchCount > 0);
+            var results  = await collection.Find(query).Project("{ HkUpdateTicks: 1}").ToListAsync();
+ 
+            long lastUpdateTicks = 0;
+            foreach(var result in results)
+            {
+                long hkUpdateTicks = result["HkUpdateTicks"].ToInt64();
+                lastUpdateTicks = (hkUpdateTicks > lastUpdateTicks) ? hkUpdateTicks : lastUpdateTicks;
+            }
+                
+            return lastUpdateTicks;
         }
     }
 }

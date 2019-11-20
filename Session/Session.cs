@@ -74,12 +74,12 @@ namespace Session
             return mSessionDB.Write(COLLECTION_NAME, this);
         }
 
-        public async Task<bool> HasChanges(DateTime since, long contextId = 0)
+        public async Task<Tuple<long, long, long>> HasChanges(DateTime since, long contextId = 0)
         {
-            bool sessionValue = await mSessionDB.HasChanges(COLLECTION_NAME, User, since);
+            long sessionLastUpdate = await mSessionDB.HasChanges(COLLECTION_NAME, User, since);
             Context context = (contextId == 0) ? GetCurrentContext() : GetContext(contextId);
-            bool contextValue = await context.HasChanges(since);
-            return (sessionValue || contextValue);
+            long contextLastUpdate = await context.HasChanges(since);
+            return new Tuple<long, long, long>(sessionLastUpdate, contextLastUpdate, context.ContextId);
         }
     }
 }

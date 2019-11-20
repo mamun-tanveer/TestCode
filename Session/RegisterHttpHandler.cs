@@ -10,12 +10,16 @@ namespace Session
     {
         protected async override Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0)
         {
-            string customerTermId, orderTermId, externalSessionIdTxt; 
-            if(qsDict.TryGetValue("customerTermId", out customerTermId)) userSession.CustomerTermId = customerTermId;
-            if(qsDict.TryGetValue("orderTermId", out orderTermId)) userSession.OrderTermId = orderTermId;
-            if(qsDict.TryGetValue("extSessionId", out externalSessionIdTxt)) userSession.ExternalSessionId = long.Parse(externalSessionIdTxt);
-            await userSession.Save();
+            string customerTermId, orderTermId, externalSessionIdTxt;
+            bool saveIndicator = false;
+            if(qsDict.TryGetValue("customerNetName", out customerTermId)) userSession.CustomerTermId = customerTermId; saveIndicator = true;
+            if(qsDict.TryGetValue("orderNetName", out orderTermId)) userSession.OrderTermId = orderTermId; saveIndicator = true;
+            if(qsDict.TryGetValue("extSessionId", out externalSessionIdTxt)) userSession.ExternalSessionId = long.Parse(externalSessionIdTxt); saveIndicator = true;
+            if(saveIndicator) await userSession.Save();
+
             return Newtonsoft.Json.JsonConvert.SerializeObject(userSession);
         }
+
+
     }
 }
