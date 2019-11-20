@@ -12,9 +12,23 @@ namespace Session
         {
             string customerTermId, orderTermId, externalSessionIdTxt;
             bool saveIndicator = false;
-            if(qsDict.TryGetValue("customerNetName", out customerTermId)) userSession.CustomerTermId = customerTermId; saveIndicator = true;
-            if(qsDict.TryGetValue("orderNetName", out orderTermId)) userSession.OrderTermId = orderTermId; saveIndicator = true;
-            if(qsDict.TryGetValue("extSessionId", out externalSessionIdTxt)) userSession.ExternalSessionId = long.Parse(externalSessionIdTxt); saveIndicator = true;
+            if (qsDict.TryGetValue("customerNetName", out customerTermId))
+            {
+                userSession.CustomerTermId = customerTermId;
+                saveIndicator = true;
+            }
+            if (qsDict.TryGetValue("orderNetName", out orderTermId))
+            {
+                userSession.OrderTermId = orderTermId;
+                saveIndicator = true;
+            }
+
+            if (qsDict.TryGetValue("extSessionId", out externalSessionIdTxt))
+            {
+                userSession.ExternalSessionId = long.Parse(externalSessionIdTxt);
+                saveIndicator = true;
+            }
+
             if(saveIndicator) await userSession.Save();
 
             return Newtonsoft.Json.JsonConvert.SerializeObject(userSession);
