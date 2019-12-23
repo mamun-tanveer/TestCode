@@ -24,14 +24,15 @@ namespace Session
 
         public async Task<IEnumerable<string>> GetAllValues()
         {
-            var dbValues = await mSessionDB.Read<string, ContextValue<string>>(COLLECTION_NAME, "User", SessionUser, ContextId);
+            var dbValues = await mSessionDB.ReadAll<ContextValue<string>>(COLLECTION_NAME, SessionUser, ContextId);
             IEnumerable<string> stringValues = dbValues.Select(x => x.ToString());
             return stringValues;    
         }
 
         public async Task<T> GetValue<T>(string key)
         {
-            var dbValues = await mSessionDB.Read<string, ContextValue<T>>(COLLECTION_NAME, "Key", key, ContextId);
+            var dbValues = await mSessionDB.Read<string, ContextValue<T>>(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
+
             ContextValue<T> firstValue = dbValues.FirstOrDefault();
             if (firstValue == null) return default(T);
             else return firstValue.Value;                        

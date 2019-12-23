@@ -19,18 +19,32 @@ namespace Session
             db = client.GetDatabase("Session");
         }
 
-        public async Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string name, TInput value, long contextId = 0)
+        public async Task<List<TOutput>> ReadAll<TOutput>(string collectionName, string userName, long contextId = 0)
         {
             var collection = db.GetCollection<TOutput>(collectionName);
             var builder = new FilterDefinitionBuilder<TOutput>();
 
-            FilterDefinition<TOutput> query = builder.Eq(name, value);
+            FilterDefinition<TOutput> query = builder.Eq("User", userName);
             if (contextId > 0)
             {
-
-                FilterDefinition<TOutput> contextQuery = builder.Eq("ContextId", contextId);
-                query = builder.And(query, contextQuery);         
+                query &= builder.Eq("ContextId", contextId);
             }
+
+            var cursor = await collection.FindAsync(query);
+            return await cursor.ToListAsync();
+        }
+
+        public async Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string userName, string keyName, TInput value, long contextId = 0)
+        {
+            var collection = db.GetCollection<TOutput>(collectionName);
+            var builder = new FilterDefinitionBuilder<TOutput>();
+
+            FilterDefinition<TOutput> query = builder.Eq(keyName, value) & builder.Eq("User", userName);
+            if (contextId > 0)
+            {
+                query &= builder.Eq("ContextId", contextId);
+            }
+               
             var cursor = await collection.FindAsync(query);
             return await cursor.ToListAsync();
         }
@@ -80,5 +94,7 @@ namespace Session
                 
             return lastUpdateTicks;
         }
+
+     
     }
 }

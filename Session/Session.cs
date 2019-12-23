@@ -22,7 +22,7 @@ namespace Session
         public static Session GetSessionForUser(ISessionStore db, string userName)
         {
             Session returnSession = null; 
-            var task = Task.Run(async() => await db.Read<string, Session>(COLLECTION_NAME, "_id", userName.ToLower()));
+            var task = Task.Run(async() => await db.Read<string, Session>(COLLECTION_NAME, userName.ToLower(), "_id", userName.ToLower()));
             if (task.Wait(10000)) returnSession = task.Result.FirstOrDefault();
 
             if (returnSession == null)
