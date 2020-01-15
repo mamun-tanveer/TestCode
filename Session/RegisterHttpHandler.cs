@@ -10,7 +10,7 @@ namespace Session
     {
         protected async override Task<string> DoWork(Session userSession, Dictionary<string, string> qsDict, long contextId = 0)
         {
-            string customerTermId, orderTermId, externalSessionIdTxt;
+            string customerTermId, orderTermId, externalSessionIdTxt, lastActiveTicks;
             bool saveIndicator = false;
             if (qsDict.TryGetValue("customerNetName", out customerTermId))
             {
@@ -26,6 +26,12 @@ namespace Session
             if (qsDict.TryGetValue("extSessionId", out externalSessionIdTxt))
             {
                 userSession.ExternalSessionId = long.Parse(externalSessionIdTxt);
+                saveIndicator = true;
+            }
+
+            if (qsDict.TryGetValue("lastActiveTicks", out lastActiveTicks))
+            {
+                userSession.LastActiveTicks = long.Parse(lastActiveTicks);
                 saveIndicator = true;
             }
 

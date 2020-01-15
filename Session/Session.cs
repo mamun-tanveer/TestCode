@@ -18,6 +18,8 @@ namespace Session
         public long ExternalSessionId { get; set; }
         public long CurrentContextId { get; set; }
         public long HkUpdateTicks { get; set; }
+        
+        public long LastActiveTicks { get; set; }
 
         public static Session GetSessionForUser(ISessionStore db, string userName)
         {
