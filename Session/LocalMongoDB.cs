@@ -25,7 +25,7 @@ namespace Session
             var builder = new FilterDefinitionBuilder<TOutput>();
 
             FilterDefinition<TOutput> query = builder.Eq("User", userName);
-            if (contextId > 0)
+            if (collectionName.StartsWith("Context"))
             {
                 query &= builder.Eq("ContextId", contextId);
             }
@@ -40,7 +40,7 @@ namespace Session
             var builder = new FilterDefinitionBuilder<TOutput>();
 
             FilterDefinition<TOutput> query = builder.Eq(keyName, value) & builder.Eq("User", userName);
-            if (contextId > 0)
+            if (collectionName.StartsWith("Context"))
             {
                 query &= builder.Eq("ContextId", contextId);
             }
@@ -76,7 +76,7 @@ namespace Session
             var collection = db.GetCollection<BsonDocument>(collectionName);
             var builder = new FilterDefinitionBuilder<BsonDocument>();
             var query = builder.And(builder.Eq("User", user), builder.Gt("HkUpdateTicks", since.Ticks));
-            if (contextId > 0)
+            if (collectionName.StartsWith("Context"))
             {
 
                 FilterDefinition<BsonDocument> contextQuery = builder.Eq("ContextId", contextId);
