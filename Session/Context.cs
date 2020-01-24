@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson;
 
 namespace Session
 {
@@ -24,30 +25,35 @@ namespace Session
 
         public async Task<IEnumerable<string>> GetAllValues()
         {
-            var dbValues = await mSessionDB.ReadAll<ContextValue<string>>(COLLECTION_NAME, SessionUser, ContextId);
+            var dbValues = await mSessionDB.ReadAll<ContextValue>(COLLECTION_NAME, SessionUser, ContextId);
             IEnumerable<string> stringValues = dbValues.Select(x => x.ToString());
             return stringValues;    
         }
 
-        public async Task<T> GetValue<T>(string key)
+        public async Task<string> GetValuesJson(string key)
         {
-            var dbValues = await mSessionDB.Read<string, ContextValue<T>>(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
-
-            ContextValue<T> firstValue = dbValues.FirstOrDefault();
-            if (firstValue == null) return default(T);
-            else return firstValue.Value;                        
+            List<ContextValue> dbValues = await mSessionDB.Read<string, ContextValue>(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
+            if(dbValues != null)
+            {
+                IEnumerable<string> returnValues = dbValues.OrderByDescending(x=>x.HkUpdateTicks).Select(x => x.Value);
+                return returnValues.ToJson();
+            }
+            else
+            {
+                return string.Empty;
+            }                       
         }
 
-        public Task AddValue<T>(string key, T newValue)
+        public Task AddValue(string key, string newValue)
         {
-            var value = new ContextValue<T> { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue, HkUpdateTicks = DateTime.Now.Ticks };
+            var value = new ContextValue { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue, HkUpdateTicks = DateTime.Now.Ticks };
             return mSessionDB.Write(COLLECTION_NAME, value);
         }
 
-        public async Task UpdateValue<T>(string key, T newValue)
+        public async Task UpdateValue(string key, string newValue)
         {
             await mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
-            var valueObject = new ContextValue<T>{ ContextId = ContextId, User = SessionUser, Key = key, Value = newValue };
+            var valueObject = new ContextValue { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue };
             await mSessionDB.Write(COLLECTION_NAME, valueObject);
         }
 

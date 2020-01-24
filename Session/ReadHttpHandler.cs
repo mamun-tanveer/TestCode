@@ -27,7 +27,7 @@ namespace Session
             }
             else
             {
-                returnValue = await readContext.GetValue<string>(keyName);
+                returnValue = await readContext.GetValuesJson(keyName);
             }
 
             return returnValue;

@@ -7,13 +7,13 @@ using System.Threading.Tasks;
 namespace Session
 {
    
-    internal class ContextValue<T> : ISessionObject
+    internal class ContextValue : ISessionObject
     {
         public object _id { get; set; }
         public long HkUpdateTicks { get; set; }
         public string User { get; set; }
         public string Key { get; set; }
-        public T Value { get; set; }
+        public string Value { get; set; }
         public long ContextId { get; set;}
 
         public override string ToString()
