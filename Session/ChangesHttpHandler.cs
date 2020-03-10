@@ -19,7 +19,7 @@ namespace Session
 
         private DateTime parseTime(string qsValue)
         {
-            DateTime returnValue = DateTime.Now; 
+            DateTime returnValue = DateTime.UtcNow; 
             if(string.IsNullOrEmpty(qsValue))
             {
                 throw new ArgumentNullException("Must pass query string value since=[date time expression]");
@@ -28,12 +28,12 @@ namespace Session
             long ticks; 
             if(DateTime.TryParse(qsValue, out returnValue))
             {
-                if (returnValue > DateTime.Now)
+                if (returnValue > DateTime.UtcNow)
                     throw new ArgumentNullException("Cannot pass a since time from the future " + returnValue.ToString(TIME_FORMAT));
             }
             else if(long.TryParse(qsValue, out ticks))
             {
-                if (ticks < 0) returnValue = new DateTime(DateTime.Now.Ticks + ticks);
+                if (ticks < 0) returnValue = new DateTime(DateTime.UtcNow.Ticks + ticks);
                 else returnValue = new DateTime(ticks);
             }
             else
