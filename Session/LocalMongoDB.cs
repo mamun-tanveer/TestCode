@@ -15,7 +15,7 @@ namespace Session
        
         public LocalMongoDB()
         {
-            var client = new MongoClient(@"mongodb://localhost/");
+            var client = new MongoClient(@"mongodb://localhost/?replicaSet=SessionRS");
             db = client.GetDatabase("Session");
         }
 
