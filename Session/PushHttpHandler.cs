@@ -15,21 +15,13 @@ namespace Session
             string action = "add";
             if(currentContext.ContextId == 0)
             {
-                action = "update";                
+                action = "update";
+                //clear the previous context on update. empty key delet
+                await currentContext.DeleteValue(string.Empty);
+                             
                 foreach (var qsPair in qsDict)
                 {
-                    if(qsPair.Key =="adId" || qsPair.Key == "WkordId")
-                    {
-                        action = "delete/add";
-                        //mainframe special values, delete all, add the new one
-                        await currentContext.DeleteValue("adId");
-                        await currentContext.DeleteValue("WkordId");
-                        await currentContext.AddValue(qsPair.Key, qsPair.Value);
-                    }
-                    else
-                    {
-                        await currentContext.UpdateValue(qsPair.Key, qsPair.Value);
-                    }
+                    await currentContext.AddValue(qsPair.Key, qsPair.Value);
                     count++;
                 }
             }

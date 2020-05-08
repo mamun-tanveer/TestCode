@@ -50,13 +50,6 @@ namespace Session
             return mSessionDB.Write(COLLECTION_NAME, value);
         }
 
-        public async Task UpdateValue(string key, string newValue)
-        {
-            await mSessionDB.Delete(COLLECTION_NAME, SessionUser, "Key", key, ContextId);
-            var valueObject = new ContextValue { ContextId = ContextId, User = SessionUser, Key = key, Value = newValue };
-            await mSessionDB.Write(COLLECTION_NAME, valueObject);
-        }
-
         public Task<long> DeleteValue(string key)
         {
             if (string.IsNullOrEmpty(key)) return mSessionDB.Delete(COLLECTION_NAME, SessionUser, string.Empty, string.Empty, ContextId);
