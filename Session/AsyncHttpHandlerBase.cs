@@ -39,9 +39,10 @@ namespace Session
                 }
                 else
                 {
-                    ISessionStore db = new LocalMongoDB();
+                    IStore sessionDB = new LocalMongoDB("Header");
+                    IStore contextDB = new LocalMongoDB("Context");
 
-                    string result = await DoWork(Session.GetSessionForUser(db, user), qsDict, contextId);
+                    string result = await DoWork(Session.GetSessionForUser(sessionDB, contextDB, user), qsDict, contextId);
                     context.Response.Write(result);
                     context.Response.ContentType = "text/json";
                 }

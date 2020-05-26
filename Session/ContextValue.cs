@@ -13,12 +13,16 @@ namespace Session
         public long HkUpdateTicks { get; set; }
         public string User { get; set; }
         public string Key { get; set; }
-        public string Value { get; set; }
+        public object Value { get; set; }
         public long ContextId { get; set;}
 
+        public T GetValue<T>()
+        {
+            return (T)Value;
+        }
         public override string ToString()
         {
-            return Key + ": " + Value;
+            return Key + ": " + Value.ToString();
         }
     }
 }

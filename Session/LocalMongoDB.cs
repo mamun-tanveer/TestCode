@@ -8,24 +8,26 @@ using MongoDB.Bson;
 
 namespace Session
 {
-    internal class LocalMongoDB : ISessionStore
+    internal class LocalMongoDB : IStore
     {
 
-        private IMongoDatabase db; 
+        private IMongoDatabase db;
+        private string mCollectionName;
        
-        public LocalMongoDB()
+        public LocalMongoDB(string collectionName)
         {
-            var client = new MongoClient(@"mongodb://localhost/?replicaSet=SessionRS");
+            var client = new MongoClient(@"mongodb://localhost");
             db = client.GetDatabase("Session");
+            mCollectionName = collectionName;
         }
 
-        public async Task<List<TOutput>> ReadAll<TOutput>(string collectionName, string userName, long contextId = 0)
+        public async Task<List<TOutput>> ReadAll<TOutput>(string userName, long contextId = 0)
         {
-            var collection = db.GetCollection<TOutput>(collectionName);
+            var collection = db.GetCollection<TOutput>(mCollectionName);
             var builder = new FilterDefinitionBuilder<TOutput>();
 
             FilterDefinition<TOutput> query = builder.Eq("User", userName);
-            if (collectionName.StartsWith("Context"))
+            if (mCollectionName.StartsWith("Context"))
             {
                 query &= builder.Eq("ContextId", contextId);
             }
@@ -34,13 +36,13 @@ namespace Session
             return await cursor.ToListAsync();
         }
 
-        public async Task<List<TOutput>> Read<TInput, TOutput>(string collectionName, string userName, string keyName, TInput value, long contextId = 0)
+        public async Task<List<TOutput>> Read<TInput, TOutput>(string userName, string keyName, TInput value, long contextId = 0)
         {
-            var collection = db.GetCollection<TOutput>(collectionName);
+            var collection = db.GetCollection<TOutput>(mCollectionName);
             var builder = new FilterDefinitionBuilder<TOutput>();
 
             FilterDefinition<TOutput> query = builder.Eq(keyName, value) & builder.Eq("User", userName);
-            if (collectionName.StartsWith("Context"))
+            if (mCollectionName.StartsWith("Context"))
             {
                 query &= builder.Eq("ContextId", contextId);
             }
@@ -49,9 +51,9 @@ namespace Session
             return await cursor.ToListAsync();
         }
 
-        public async Task Write(string collectionName, ISessionObject sessionObject)
+        public async Task Write(ISessionObject sessionObject)
         {
-            var collection = db.GetCollection<ISessionObject>(collectionName);
+            var collection = db.GetCollection<ISessionObject>(mCollectionName);
             var queryBuilder = new FilterDefinitionBuilder<ISessionObject>();
             if (sessionObject._id == null) sessionObject._id = MongoDB.Bson.ObjectId.GenerateNewId();
             sessionObject.HkUpdateTicks = DateTime.UtcNow.Ticks;
@@ -59,9 +61,9 @@ namespace Session
             await collection.ReplaceOneAsync(query, sessionObject, new UpdateOptions { IsUpsert = true });
         }
 
-        public async Task<long> Delete<T>(string collectionName, string user, string name, T value, long contextId = 0) 
+        public async Task<long> Delete<T>(string user, string name, T value, long contextId = 0) 
         {
-            var collection = db.GetCollection<ISessionObject>(collectionName);
+            var collection = db.GetCollection<ISessionObject>(mCollectionName);
             var queryBuilder = new FilterDefinitionBuilder<ISessionObject>();
             var queryList = new List<FilterDefinition<ISessionObject>>();
             queryList.Add(queryBuilder.Eq("User", user));                
@@ -71,12 +73,12 @@ namespace Session
             return result.DeletedCount;
         }
 
-        public async Task<long> HasChanges(string collectionName, string user, DateTime since, long contextId = 0)
+        public async Task<long> HasChanges(string user, DateTime since, long contextId = 0)
         {
-            var collection = db.GetCollection<BsonDocument>(collectionName);
+            var collection = db.GetCollection<BsonDocument>(mCollectionName);
             var builder = new FilterDefinitionBuilder<BsonDocument>();
             var query = builder.And(builder.Eq("User", user), builder.Gt("HkUpdateTicks", since.Ticks));
-            if (collectionName.StartsWith("Context"))
+            if (mCollectionName.StartsWith("Context"))
             {
 
                 FilterDefinition<BsonDocument> contextQuery = builder.Eq("ContextId", contextId);
